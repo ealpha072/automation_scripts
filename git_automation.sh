@@ -64,6 +64,12 @@ function check_gitconfig(){
     fi
 }
 
+function choose_distro(){
+	#choose distro
+	echo "Choose distro below"
+	echo "Ubuntu [1]"
+}
+
 
 which git > /dev/null 2>&1
 
