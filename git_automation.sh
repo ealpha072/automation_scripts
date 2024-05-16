@@ -64,10 +64,16 @@ function check_gitconfig(){
     fi
 }
 
-function choose_distro(){
-	#choose distro
-	echo "Choose distro below"
-	echo "Ubuntu [1]"
+function get_distro(){
+    #get linux distro and return appropriate value
+    
+    while IFS= read -r line; do
+        if [[ $line == "NAME=\"Ubuntu\"" || $line == "NAME=\"Kali\""* || $line == "NAME=\"Linux Mint\""* || $line == "NAME=\"Debian\""* ]];then
+            echo 1
+        else
+            echo 0
+        fi
+    done < <(cat /etc/os-release)
 }
 
 
@@ -78,6 +84,16 @@ if [ $? -eq 0 ]; then
     check_gitconfig
 else
 	read -p "Git not found. Install git?[yes/no]: " git_install_response
+
+    echo "Checking linux distro"
+    distro = $(get_distro)
+    if [ $distro -eq 1 ]; then
+        echo "Distro supported, continuing to install"
+    else
+        echo "Distro not supported, exiting"
+        exit 1
+    fi
+
 	
 	if [[ $git_install_response -eq "yes" || $git_install_response -eq "y" ]]; then
         apt-get install git
@@ -93,4 +109,3 @@ else
         exit 1
     fi
 fi
-
