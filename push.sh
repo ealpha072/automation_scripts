@@ -27,7 +27,7 @@ if [[ -n $(git status -s) ]]; then
     read -p "Push changes? [y/n]: " push_ch
 
     if [ "$push_ch" == "y" ];then
-        if [ git push -v ];then
+        if git push -v ;then
             echo "Changes pushed to remote"
         else
             echo "Error pushing changes"
