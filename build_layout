@@ -126,7 +126,7 @@ function write_server(){
     app.use(middleware.requestLogger);
     app.use(\"/app\", appRoute);
     app.use(middleware.faviconIgnore)
-    app.use(middleware.unknownEndpoint;
+    app.use(middleware.unknownEndpoints);
     app.use(middleware.errorHandler);" > "$filename"
 }
 
@@ -167,20 +167,6 @@ function write_model(){
     export default User;" > "$filename"
 }
 
-function remove_leading_tabs() {
-    for folder in "$@"; do
-        if [[ -d "$folder" ]]; then
-            find "$folder" -type f | while read -r file; do
-                sed -i 's/^\t//' "$file"
-            done
-            echo "Leading tabs removed from all files in $folder and its subfolders."
-        else
-            echo "Warning: $folder is not a directory or does not exist."
-        fi
-    done
-}
-
-
 write_model "models/models.js"
 write_route "routes/routes.js" 
 write_config "utils/config.js"
@@ -188,5 +174,5 @@ write_logger "utils/logger.js"
 write_middleware "utils/middleware.js"
 
 write_server "index.js" && write_env ".env"
-remove_leading_tabs "models" "routes" "utils" "index.js" ".env"
+
 npm run dev
