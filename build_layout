@@ -1,0 +1,192 @@
+#!/bin/bash
+
+mkdir backend
+cd backend 
+mkdir models routes utils 
+echo "Creating common files"
+touch index.js .env .gitignore
+echo "node_modules" >> .gitignore
+echo ".env" >> .gitignore
+
+echo "Initializing npm in backend"
+npm init -y
+
+echo "Intalling dependencies, please wait"
+npm install cors dotenv express mongoose morgan
+npm install nodemon --save-dev
+
+echo "Modifying package.json"
+sed -i '/"test":/s/$/,/; /"test":/a\    "dev": "nodemon index.js"' package.json
+sed -i '/"main": "index.js"/a\  "type": "module",' package.json
+
+cd models && touch models.js
+cd ../routes && touch routes.js
+cd ../utils && touch config.js middleware.js logger.js
+cd ..
+
+echo "Building dir structure complete: Switching to parent dir (backend)"
+
+function write_env(){
+    filename=$1
+    echo "
+PORT=5000
+MONGODB_URI=\`mongodb+srv://<username>:<pass>@cluster0.rypdi.mongodb.net/<database>?retryWrites=true&w=majority\`" > "$filename"
+}
+
+function write_config(){
+    filename=$1
+    echo "
+import dotenv from 'dotenv'
+dotenv.config({path:'./.env'})
+
+const PORT = process.env.PORT
+const url = process.env.MONGODB_URI
+
+export default {PORT, url}" > "$filename"
+
+}
+
+function write_logger(){
+    filename=$1
+    echo "
+    const info = (...params) => {
+	    console.log(...params)
+    }
+
+    const error = (...params) => {
+	    console.error(...params)
+    }
+
+    export default {info, error}" > "$filename"
+}
+
+function write_middleware(){
+    filename=$1
+    echo "
+    import logger from \"./logger.js\"
+
+    const requestLogger = (req, res, next) => {
+        logger.info(\"Method:\", req.method);
+        logger.info(\"Path:\", req.path);
+        logger.info(\"Body:\", req.body);
+        logger.info(\"-------------\");
+
+        next();
+    };
+
+    const errorHandler = (error, req, res, next) => {
+        console.error(error.message);
+        next(error)
+    }
+
+    const faviconIgnore = (request, response, next) => {
+        if(request.originalUrl.includes('/favicon.ico')){
+            return response.status(204).end()
+        }
+        next()
+    }
+
+    const unknownEndpoints = (request, response) => {
+        response.status(400).sen({error: 'Unknown Endpoint'})
+    }
+
+    export default {requestLogger, unknownEndpoints, errorHandler, faviconIgnore}"  > "$filename"
+    return 0;
+}
+
+function write_server(){
+    filename=$1
+    # call this with index.js
+    echo "
+    import express from \"express\";
+    import mongoose from \"mongoose\";
+    import config from \"./utils/config.js\";
+    import cors from \"cors\";
+    import logger from \"./utils/logger.js\";
+    import middleware from \"./utils/middleware.js\";
+    import appRoute from \"./routes/routes.js\";
+
+    const app = express();
+    const PORT = config.PORT;
+    const URL = config.url;
+    logger.info(\`Attempting connection to: \${URL}\`);
+
+    mongoose.set(\"strictQuery\", true);
+    mongoose.connect(URL).then(() => {
+        logger.info(\`Connected to database\`);
+        app.listen(PORT, () => {
+            logger.info(\`Server listening on port \${PORT}\`);
+        });
+    }).catch((error) => {
+        logger.error(error.message);
+    });
+    
+    app.use(cors({origin:\"*\"}))
+    app.use(express.json());
+    app.use(middleware.requestLogger);
+    app.use(\"/app\", appRoute);
+    app.use(middleware.faviconIgnore)
+    app.use(middleware.unknownEndpoint;
+    app.use(middleware.errorHandler);" > "$filename"
+}
+
+function write_route(){
+    filename=$1
+    echo "
+    import express from \"express\";
+    import User from \"../models/models.js\";
+    const appRoute = express.Router();
+
+    appRoute.get(\"/\", (req, res) => {
+        res.send(\"Good morning Africa\");
+    });
+
+    export default appRoute;" > "$filename"
+}
+
+function write_model(){
+    filename=$1
+    echo " 
+    import mongoose from \"mongoose\";
+
+    const userSchema = new mongoose.Schema({
+        username: String,
+    });
+
+    userSchema.set(\"toJSON\", {
+        transform: (document, returnedObject) => {
+            returnedObject._id = returnedObject._id.toString();
+            delete returnedObject._id;
+            delete returnedObject.__v;
+            //delete hashed password
+            delete returnedObject.passwordHash;
+        },
+    });
+
+    const User = mongoose.model(\"user\", userSchema);
+    export default User;" > "$filename"
+}
+
+function remove_leading_tabs() {
+    for folder in "$@"; do
+        if [[ -d "$folder" ]]; then
+            find "$folder" -type f | while read -r file; do
+                sed -i 's/^\t//' "$file"
+            done
+            echo "Leading tabs removed from all files in $folder and its subfolders."
+        else
+            echo "Warning: $folder is not a directory or does not exist."
+        fi
+    done
+}
+
+
+write_model "models/models.js"
+write_route "routes/routes.js" 
+write_config "utils/config.js"
+write_logger "utils/logger.js" 
+write_middleware "utils/middleware.js"
+
+write_server "index.js" && write_env ".env"
+remove_leading_tabs "models" "routes" "utils" "index.js" ".env"
+npm run dev

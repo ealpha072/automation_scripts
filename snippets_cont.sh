@@ -18,4 +18,5 @@ usage() {
     exit 1
 }
 
-
+log "Starting script"
+usage
