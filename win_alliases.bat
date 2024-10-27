@@ -5,4 +5,5 @@ doskey cls=cls
 doskey cp=copy
 doskey mv=move
 doskey rm=del /Q
-doskey touch=type nul > "$*"
+doskey mkdir=mkdir
+doskey rmdir=rmdir /S /Q
