@@ -1,7 +1,13 @@
-#some more ls aliases
+# some more ls aliases
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
-alias c="clear"
-alias gs="git status"
-alias gp="git push --verbose"
+alias c='clear'
+alias gs='git status'
+alias gp='git push --verbose'
+alias gc='git commit -m'
+alias gcl='git clone'
+alias ga='git add .'
+alias gf='git fetch'
+alias rd='rm -rf'
+alias bye='shutdown -r now'
