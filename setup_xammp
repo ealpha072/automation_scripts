@@ -1,0 +1,42 @@
+#!/bin/bash
+
+echo "Installing XAMMP from https://sourceforge.net/projects/xampp/files/XAMPP%20Linux/8.1.25/ using wget to home folder"
+cd ~
+
+wget https://sourceforge.net/projects/xampp/files/XAMPP%20Linux/8.1.25/xampp-linux-x64-8.1.25-0-installer.run
+
+echo "Finished installing xammp, setting executable permissions"
+chmod +x xampp-linux-x64-8.1.25-0-installer.run
+
+echo "Getting net-tools for apache"
+sudo apt install net-tools
+
+echo "Running the installer, please input password when prompted"
+sudo ./xampp-linux-x64-8.1.25-0-installer.run
+
+
+echo "Add below aliases to for start and stop"
+echo "alias sx='sudo systemctl stop apache2 && sudo /opt/lampp/lampp start'"
+echo "alias stx='sudo /opt/lampp/lampp stop'"
+echo "alias resx='sudo /opt/lampp/lampp restart'"
+echo "alias relx='sudo /opt/lampp/lampp reload'"
+echo "alias unx='sudo /opt/lampp/ uninstall'"
+
+#echo "Creating desktop shortcut"
+
+#shortcut="Desktop/XAMMP.desktop"
+
+#echo "
+#[Desktop Entry]
+#Version=1.0
+#Type=Application
+#Name=XAMPP
+#Exec=sudo /opt/lampp/manager-linux-x64.run
+#Icon=/opt/lampp/htdocs/favicon.ico
+#Terminal=false
+#StartupNotify=false" > "$shortcut"
+
+
+
+
+
