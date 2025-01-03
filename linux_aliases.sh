@@ -1,3 +1,5 @@
+# put below in ~/.bashrc
+
 # some more ls aliases
 # File lists
 alias ll='ls -alF'
