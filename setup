@@ -1,0 +1,252 @@
+#!/bin/bash
+
+
+#Updating system
+function sys_upgrade {
+	echo "Updating system packages"
+	sudo apt update && sudo apt upgrade -y
+}
+
+function setup_vim {
+	# Install and setup vim
+	# Check if vim is installed
+	
+	if command -v vim &> /dev/null;then
+			echo "Vim already installed, setting up vimrc"
+			run_vim_setup
+			echo "Wriiten to vimrc successful"
+			exit 1
+	else
+		sudo apt install vim -y
+		run_vim_setup
+		echo "Success on writing vimrc"
+		exit 1
+	fi
+}
+
+function run_vim_setup {
+	echo "Setting up basic vim configurations..."
+cat <<EOF> ~/.vimrc
+" Disable compatibility with vi which can cause unexpected issues.
+set nocompatible
+
+" Enable type file detection. Vim will be able to try to detect the type of file in use.
+filetype on
+
+" Enable plugins and load plugin for the detected file type.
+filetype plugin on
+
+" Load an indent file for the detected file type.
+filetype indent on
+
+" Turn syntax highlighting on.
+syntax on
+
+" Add numbers to each line on the left-hand side.
+set number
+
+" Set shift width to 4 spaces.
+set shiftwidth=4
+
+" Set tab width to 4 columns.
+set tabstop=4
+
+" Use space characters instead of tabs.
+set expandtab
+
+" Do not save backup files.
+set nobackup
+
+" Do not let cursor scroll below or above N number of lines when scrolling.
+set scrolloff=10
+
+" Do not wrap lines. Allow long lines to extend as far as the line goes.
+set nowrap
+
+" While searching though a file incrementally highlight matching characters as you type.
+set incsearch
+
+" Ignore capital letters during search.
+set ignorecase
+
+" Show partial command you type in the last line of the screen.
+set showcmd
+
+" Show the mode you are on the last line.
+set showmode
+
+" Show matching words during a search.
+set showmatch
+
+" Use highlighting when doing a search.
+set hlsearch
+
+" Set the commands to save in history default number is 20.
+set history=1000
+
+" Enable auto completion menu after pressing TAB.
+set wildmenu
+
+" Make wildmenu behave like similar to Bash completion.
+set wildmode=list:longest
+EOF
+}
+
+# Unisntall fire fox
+function remove_firefox {
+	sudo apt-get remove firefox
+	sudo apt-get purge firefox
+	rm -rf ~/.mozilla/firefox
+	rm -rf ~/etc/firefox #restart after this
+}
+
+
+# Setup Git
+function setup_git {
+	echo "Updating package list, please hang on..."
+	sudo apt-get update
+	echo ""
+	echo ""
+	echo "Installing git, please hang on..."
+	sudo apt-get install git -y
+	echo ""
+	echo ""
+	
+	echo "Configuring git..."
+	read -p "Enter github username:" git_user_name
+	read -p "Enter github email:" git_email
+	git config --global user.name "$git_user_name"
+	git config --global user.email "$git_email"
+	echo ""
+	echo ""
+
+	echo "Git configured with:"
+	echo "User name: $git_user_name"
+	echo "Email: $git_email"
+
+	echo "Generating SSH Key"
+	ssh-keygen -t ed25519 -C "$git_email"
+
+	echo "Here is your SSH key, please copy to clipboard and paste opn github"
+	cat ~/.ssh/id_ed25519.pub
+}
+
+
+# Setup Chrome
+function setup_chrome {
+	echo "Updating packages..."
+	sudo apt update -y
+	echo ""
+	
+	echo "Installing dependancies"
+	sudo apt-get install libxss1 libappindicator1 libindicator7
+	echo ""
+	
+	echo "Getting package from deb, this may take a while..."
+	wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+	echo ""
+	
+	echo "Installing chrome, please hang tight..."
+	sudo apt install ./google-chrome*.deb
+	sudo apt-get install -f
+	
+	echo "Opening chrome, please wait"
+	google-chrome
+}
+
+#Setup VSCODE
+function setup_vscode {
+	echo "Updating packages, please wait..."
+	sudo apt update
+	echo ""
+	
+	echo "Installing required dependencies..."
+	sudo apt install -y software-properties-common apt-transport-https wget
+
+	echo "Success on dependency installs !!"
+	# Import Microsoft's GPG key
+	echo "Importing Microsoft's GPG key..."
+	wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | sudo gpg --dearmor -o /usr/share/keyrings/microsoft.gpg
+
+	# Add VS Code repository
+	echo "Adding Visual Studio Code repository..."
+	echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
+
+	# Update package list and install VS Code
+	echo "Installing Visual Studio Code..."
+	sudo apt update
+	sudo apt install code -y
+
+	# Launch VS Code to verify installation
+	echo "Launching Visual Studio Code..."
+	code &	
+}
+
+function setup_aliases {
+	echo "Setting up basic aliases..."
+cat <<EOF> ~/.bash_aliases
+# File lists
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# apps
+alias chrome='google-chrome'
+
+# cd aliases
+alias ch='cd ~'
+alias cdd='cd Desktop && la'
+alias cdg='cd Desktop/Github && la'
+alias ..='cd ..'
+alias ...='cd ../..'
+
+# Terminal Aliases
+alias c='clear'
+
+# Git aliases
+alias gs='git status'
+alias gp='git push --verbose'
+alias gc='git commit -m'
+alias gcl='git clone'
+alias ga='git add .'
+alias gpu='git pull'
+alias rd='rm -rf'
+alias bye='shutdown -r now'
+alias jn='jupyter notebook'
+
+alias id='whoami'
+alias eal='vi ~/.bash_aliases'
+EOF
+
+echo "Aliases created successfully, reloading bashrc..."
+source ~/.bashrc
+echo "Success!!"
+}
+
+echo "Main menu options: "
+echo "[0]: All"
+echo "[1]: Upgrade system"
+echo "[2]: Setup vim"
+echo "[3]: Setup git"
+echo "[4]: Setup chrome"
+echo "[5]: Setup vscode"
+echo "[6]: Setup aliases"
+
+read -p "What do you want to do? " user_option
+
+if [ "$user_option" -eq 1 ]; then
+	sys_upgrade
+elif [ "$user_option" -eq 2 ]; then
+	setup_vim
+elif [ "$user_option" -eq 3 ]; then
+	setup_git
+elif [ "$user_option" -eq 4 ]; then
+	setup_chrome
+elif [ "$user_option" -eq 5 ]; then
+	setup_vscode
+elif [ "$user_option" -eq 6 ]; then
+	setup_aliases
+else
+	echo "Invalid option"
+fi
+
