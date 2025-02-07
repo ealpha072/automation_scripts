@@ -223,6 +223,20 @@ source ~/.bashrc
 echo "Success!!"
 }
 
+function setup_qemu {
+	echo "Updating packages..."
+	sudo apt update -y
+	echo ""
+	echo "Installing nasm"
+	sudo apt install nasm -y
+	
+	echo "Finished installing NAMS, getting qemu"
+	sudo apt install qemu-system -y
+
+    echo "Finished getting QEMU, getting gcc"
+    sudo apt install gcc -y
+}
+
 echo "Main menu options: "
 echo "[0]: All"
 echo "[1]: Upgrade system"
@@ -231,6 +245,7 @@ echo "[3]: Setup git"
 echo "[4]: Setup chrome"
 echo "[5]: Setup vscode"
 echo "[6]: Setup aliases"
+echo "[7]: Setup NASM-QEMU"
 
 read -p "What do you want to do? " user_option
 
@@ -246,7 +261,8 @@ elif [ "$user_option" -eq 5 ]; then
 	setup_vscode
 elif [ "$user_option" -eq 6 ]; then
 	setup_aliases
+elif [ "$user_option" -eq 7 ];then
+	setup_qemu
 else
 	echo "Invalid option"
 fi
-
