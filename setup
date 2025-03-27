@@ -227,14 +227,8 @@ function setup_qemu {
 	echo "Updating packages..."
 	sudo apt update -y
 	echo ""
-	echo "Installing nasm"
-	sudo apt install nasm -y
-	
-	echo "Finished installing NAMS, getting qemu"
-	sudo apt install qemu-system -y
-
-    echo "Finished getting QEMU, getting gcc"
-    sudo apt install gcc -y
+	echo "Installing qemu, nasm, gcc, gdb and build essentials"
+	sudo apt install build-essential nasm qemu-system-x86 gcc-multilib gdb -y
 }
 
 echo "Main menu options: "
