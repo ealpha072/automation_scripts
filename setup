@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 #Updating system
 function sys_upgrade {
 	echo "Updating system packages"
@@ -231,6 +230,27 @@ function setup_qemu {
 	sudo apt install build-essential nasm qemu-system-x86 gcc-multilib gdb -y
 }
 
+function setup_rust{
+    #Installing rust using the rustup tool
+    if command -v curl >/dev/null 2>&1;then
+        echo  "Curl is found"
+        echo "Proceeding to install rust"
+        
+        curl --proto ''=https' --tlsv1.3 https://sh.rustup.rs -sSf | sh'
+        
+        echo "Installed rust, adding to path, and veryfying installation..."
+        source $HOME/.cargo/env
+        rustc --version
+        echo "Installed rust"
+        exit
+    else
+        echo "Curl not found, installing curl"
+        sudo apt install curl
+        echo "Curl installed, checking version"
+        curl --version
+    fi
+}
+
 echo "Main menu options: "
 echo "[0]: All"
 echo "[1]: Upgrade system"
@@ -240,6 +260,7 @@ echo "[4]: Setup chrome"
 echo "[5]: Setup vscode"
 echo "[6]: Setup aliases"
 echo "[7]: Setup NASM-QEMU"
+echo "[8]: Setup rust"
 
 read -p "What do you want to do? " user_option
 
@@ -257,6 +278,8 @@ elif [ "$user_option" -eq 6 ]; then
 	setup_aliases
 elif [ "$user_option" -eq 7 ];then
 	setup_qemu
+elif [ "$user_option" -eq 8 ];then
+    setup_rust
 else
 	echo "Invalid option"
 fi
