@@ -230,25 +230,18 @@ function setup_qemu {
 	sudo apt install build-essential nasm qemu-system-x86 gcc-multilib gdb -y
 }
 
-function setup_rust{
-    #Installing rust using the rustup tool
-    if command -v curl >/dev/null 2>&1;then
-        echo  "Curl is found"
-        echo "Proceeding to install rust"
-        
-        curl --proto ''=https' --tlsv1.3 https://sh.rustup.rs -sSf | sh'
-        
-        echo "Installed rust, adding to path, and veryfying installation..."
-        source $HOME/.cargo/env
-        rustc --version
-        echo "Installed rust"
-        exit
-    else
-        echo "Curl not found, installing curl"
-        sudo apt install curl
-        echo "Curl installed, checking version"
-        curl --version
-    fi
+function setup_rust {
+    echo "Getting curl..."
+    sudo apt install curl -y
+    echo "Getting rustc, configuring environment, and verifying installation..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    . "$HOME/.cargo/env"
+    rustc --version
+}
+
+function remove_rust {
+    rustup self unistall -y
+    echo "Removed rust from system"
 }
 
 echo "Main menu options: "
